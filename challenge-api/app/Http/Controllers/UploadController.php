@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UploadFileRequest;
+use App\Services\UploadService;
 use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
+    function __construct(private UploadService $uploadService) {}
+
     public function listUploads()
     {
         return response()->json([
@@ -13,8 +17,12 @@ class UploadController extends Controller
         ]);
     }
 
-    public function uploadFile(Request $request)
+    public function uploadFile(UploadFileRequest $request)
     {
+        $file_name = $request->get('name');
+        $file = $request->file('file');
+        $this->uploadService->processFile($file, $file_name);
+
         return response()->json([
             'message' => 'Devo fazer upload do arquivo'
         ]);
