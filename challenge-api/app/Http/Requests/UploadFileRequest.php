@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UploadFileTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class UploadFileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;// Auth::check();
+        return Auth::check();
     }
 
     /**
@@ -24,7 +25,7 @@ class UploadFileRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string',
-            'file' => 'required|file|mimes:zip,csv,xlsx'
+            'file' => ['required', 'file', new UploadFileTypeRule]
         ];
     }
 }
