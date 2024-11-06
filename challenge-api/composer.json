@@ -6,11 +6,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-zip": "*",
         "laravel/breeze": "^2.1",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "ext-zip": "*"
+        "mongodb/laravel-mongodb": "^5.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.1",

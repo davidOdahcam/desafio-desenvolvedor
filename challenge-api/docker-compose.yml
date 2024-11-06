@@ -7,8 +7,8 @@ services:
         uid: 1000
       context: .
       dockerfile: Dockerfile
-    image: ot-challenge-api
-    container_name: ot-challenge-api
+    image: ot-api
+    container_name: ot-api
     restart: unless-stopped
     working_dir: /var/www/api/
     volumes:
@@ -16,47 +16,30 @@ services:
     networks:
       - ot-challenge
     depends_on:
-      - db
+      - mongo
 
-  db:
-    image: mysql:8.0
-    container_name: ot-challenge-mysql
-    ports:
-      - "${FORWARD_DB_PORT:-3306}:3306"
+  mongo:
+    image: mongo:latest
+    container_name: ot-mongo
     restart: unless-stopped
+    ports:
+        - "27017:27017"
     environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_ROOT_HOST: "%"
-      MYSQL_DATABASE: '${DB_DATABASE}'
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      MONGO_INITDB_ROOT_USERNAME: '${DB_USERNAME}'
+      MONGO_INITDB_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MONGO_INITDB_DATABASE: '${DB_DATABASE}'
     networks:
-      - ot-challenge
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-      retries: 3
-      timeout: 5s
+        - ot-challenge
 
   nginx:
     image: nginx:alpine
-    container_name: ot-challenge-nginx
+    container_name: ot-nginx
     restart: unless-stopped
     ports:
       - 8000:80
     volumes:
       - ./:/var/www/api
       - ./docker/nginx:/etc/nginx/conf.d/
-    networks:
-      - ot-challenge
-
-  mailhog:
-    image: "mailhog/mailhog:latest"
-    container_name: mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
     networks:
       - ot-challenge
 
