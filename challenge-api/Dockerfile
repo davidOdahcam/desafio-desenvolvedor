@@ -24,6 +24,9 @@ RUN docker-php-ext-configure zip && docker-php-ext-install zip
 # Instale a extensão mongodb
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -35,6 +38,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN echo "upload_max_filesize = 512M" >> /usr/local/etc/php/php.ini
 RUN echo "post_max_size = 512M" >> /usr/local/etc/php/php.ini
+RUN echo "memory_limit = 512M" >> /usr/local/etc/php/php.ini
 
 # Create system user to run Composer and Artisan Commands
 RUN useradd -G www-data,root -u $uid -d /home/$user $user
