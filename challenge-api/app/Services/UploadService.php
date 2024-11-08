@@ -3,15 +3,15 @@
 namespace App\Services;
 
 use App\Enums\UploadStatusEnum;
+use App\Jobs\ProcessFileImport;
 use App\Models\Upload;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
 
 class UploadService {
-    public function processFile(UploadedFile $uploadedFile, string $filename = null) {
+    public function processFile(UploadedFile $uploadedFile, string $filename = null): Upload {
         $upload = new Upload([
             'status' => UploadStatusEnum::PENDING
         ]);
@@ -24,13 +24,13 @@ class UploadService {
             $upload->path = $uploadedFile->storeAs("uploads/{$uploadedFile->getClientOriginalName()}");
         }
 
-        $filename = pathinfo($upload->path, PATHINFO_FILENAME);
-        $extension = pathinfo($upload->path, PATHINFO_EXTENSION);
-
-        $upload->name = $filename;
-        $upload->extension = $extension;
-
+        $upload->name = pathinfo($upload->path, PATHINFO_FILENAME);
+        $upload->extension = pathinfo($upload->path, PATHINFO_EXTENSION);
         $upload->save();
+
+        dispatch(new ProcessFileImport($upload->id));
+
+        return $upload;
     }
 
     private function unzipUploadedFile(UploadedFile $uploadedFile): string {
@@ -49,7 +49,7 @@ class UploadService {
 
             throw_if(count($files) === 0, new \Exception('File not found'));
 
-            $filePath = $tempFolder->path($files[0]);
+            $filePath = "temp/{$files[0]}";
             $extension = pathinfo($filePath, PATHINFO_EXTENSION);
 
             if ($extension !== 'csv' && $extension !== 'xlsx') {
@@ -57,24 +57,13 @@ class UploadService {
             }
 
             $filename = basename($filePath);
-
             $permanentPath = "uploads/{$filename}";
             Storage::move($filePath, $permanentPath);
-
             $tempFolder->deleteDirectory($uniqueId);
 
-            return "app/{$permanentPath}";
+            return $permanentPath;
         }
 
         throw new \Exception('Error');
-    }
-
-    private function processCsvFile(string $filePath) {
-        // TODO: JOB
-    }
-
-    private function processExcelFile(string $filePath) {
-        // TODO: JOB
-        DB::getConfig();
     }
 }

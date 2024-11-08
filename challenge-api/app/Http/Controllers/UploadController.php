@@ -21,11 +21,8 @@ class UploadController extends Controller
     {
         $file_name = $request->get('name');
         $file = $request->file('file');
-        $this->uploadService->processFile($file, $file_name);
-
-        return response()->json([
-            'message' => 'Devo fazer upload do arquivo'
-        ]);
+        $upload = $this->uploadService->processFile($file, $file_name);
+        return response()->json($upload);
     }
 
     public function searchFile(Request $request)

@@ -8,7 +8,6 @@ use MongoDB\Laravel\Relations\HasMany;
 
 class Upload extends Model
 {
-    protected $connection = 'mongodb';
     protected $fillable = [
         'name',
         'extension',
