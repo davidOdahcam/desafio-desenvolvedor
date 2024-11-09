@@ -1,74 +1,73 @@
 version: "3.7"
 services:
-  api:
-    build:
-      args:
-        user: david
-        uid: 1000
-      context: .
-      dockerfile: Dockerfile
-    image: ot-api
-    container_name: ot-api
-    restart: unless-stopped
-    working_dir: /var/www/api/
-    volumes:
-      - ./:/var/www/api
-    networks:
-      - ot-challenge
-    depends_on:
-      - mongo
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                user: david
+                uid: 1000
+        image: ot-api
+        container_name: ot-api
+        restart: unless-stopped
+        working_dir: /var/www/api/
+        volumes:
+            - ./:/var/www/api
+        networks:
+            - ot-challenge
+        depends_on:
+            - mongo
 
-  mongo:
-    image: mongo:latest
-    container_name: ot-mongo
-    restart: unless-stopped
-    ports:
-        - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: '${DB_USERNAME}'
-      MONGO_INITDB_ROOT_PASSWORD: '${DB_PASSWORD}'
-      MONGO_INITDB_DATABASE: '${DB_DATABASE}'
-    networks:
-      - ot-challenge
+    redis:
+        image: redis:alpine
+        container_name: ot-redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        networks:
+            - ot-challenge
 
-  redis:
-    image: redis:alpine
-    container_name: ot-redis
-    restart: unless-stopped
-    ports:
-        - "6379:6379"
-    networks:
-        - ot-challenge
+    queue-worker:
+        image: ot-api
+        container_name: ot-queue-worker
+        command: php artisan queue:work --sleep=3 --tries=3
+        restart: unless-stopped
+        working_dir: /var/www/api/
+        volumes:
+            - ./:/var/www/api
+        networks:
+            - ot-challenge
+        depends_on:
+            - api
 
-  queue-worker:
-    image: ot-api
-    container_name: ot-queue-worker
-    command: php artisan queue:work --sleep=3 --tries=3
-    restart: unless-stopped
-    working_dir: /var/www/api/
-    volumes:
-      - ./:/var/www/api
-    networks:
-      - ot-challenge
-    depends_on:
-      - api
+    nginx:
+        image: nginx:alpine
+        container_name: ot-nginx
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./:/var/www/api
+            - ./docker/nginx:/etc/nginx/conf.d/
+        networks:
+            - ot-challenge
 
-  nginx:
-    image: nginx:alpine
-    container_name: ot-nginx
-    restart: unless-stopped
-    ports:
-      - 8000:80
-    volumes:
-      - ./:/var/www/api
-      - ./docker/nginx:/etc/nginx/conf.d/
-    networks:
-      - ot-challenge
+    mongo:
+        image: mongo:latest
+        container_name: ot-mongo
+        command: mongod --replSet myReplicaSet --bind_ip localhost,mongo
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_DATABASE: "${DB_DATABASE}"
+        networks:
+            - ot-challenge
+        restart: unless-stopped
 
 networks:
-  ot-challenge:
-    driver: bridge
+    ot-challenge:
+        driver: bridge
 
 volumes:
-  ot-mysql:
-    driver: local
+    ot-mysql:
+        driver: local
