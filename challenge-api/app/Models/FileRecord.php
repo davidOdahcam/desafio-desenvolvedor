@@ -8,7 +8,7 @@ use MongoDB\Laravel\Relations\BelongsTo;
 class FileRecord extends Model
 {
     protected $fillable = [
-        'upload_id',
+        'file_id',
         'RptDt',
         'TckrSymb',
         'Asst',
@@ -67,6 +67,6 @@ class FileRecord extends Model
 
     public function upload(): BelongsTo
     {
-        return $this->belongsTo(Upload::class);
+        return $this->belongsTo(File::class);
     }
 }

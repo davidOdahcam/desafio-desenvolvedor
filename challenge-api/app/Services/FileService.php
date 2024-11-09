@@ -2,35 +2,37 @@
 
 namespace App\Services;
 
-use App\Enums\UploadStatusEnum;
+use App\Enums\FileStatusEnum;
+use App\Imports\FileImport;
 use App\Jobs\ProcessFileImport;
-use App\Models\Upload;
+use App\Models\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use ZipArchive;
 
-class UploadService {
-    public function processFile(UploadedFile $uploadedFile, string $filename = null): Upload {
-        $upload = new Upload([
-            'status' => UploadStatusEnum::PENDING
+class FileService {
+    public function processFile(UploadedFile $uploadedFile): File {
+        $file = new File([
+            'status' => FileStatusEnum::PENDING
         ]);
 
         $extension = $uploadedFile->getClientOriginalExtension();
 
         if ($extension === 'zip') {
-            $upload->path = $this->unzipUploadedFile($uploadedFile);
+            $file->path = $this->unzipUploadedFile($uploadedFile);
         } else {
-            $upload->path = $uploadedFile->storeAs("uploads/{$uploadedFile->getClientOriginalName()}");
+            $file->path = $uploadedFile->storeAs("uploads/{$uploadedFile->getClientOriginalName()}");
         }
 
-        $upload->name = pathinfo($upload->path, PATHINFO_FILENAME);
-        $upload->extension = pathinfo($upload->path, PATHINFO_EXTENSION);
-        $upload->save();
+        $file->name = pathinfo($file->path, PATHINFO_FILENAME);
+        $file->extension = pathinfo($file->path, PATHINFO_EXTENSION);
+        $file->save();
 
-        dispatch(new ProcessFileImport($upload->id));
+        dispatch(new ProcessFileImport($file->id));
 
-        return $upload;
+        return $file;
     }
 
     private function unzipUploadedFile(UploadedFile $uploadedFile): string {
@@ -65,5 +67,19 @@ class UploadService {
         }
 
         throw new \Exception('Error');
+    }
+
+    public function importFile(File $file)
+    {
+        try {
+            $file->updateStatus(FileStatusEnum::PROCESSING);
+            Excel::import(new FileImport($file), $file->path);
+            $file->updateStatus(FileStatusEnum::COMPLETED);
+
+            Storage::delete($file->path);
+        } catch (\Exception $e) {
+            logger()->debug($e);
+            $file->updateStatus(FileStatusEnum::FAILED);
+        }
     }
 }

@@ -3,25 +3,23 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
-use App\Enums\UploadStatusEnum;
+use App\Enums\FileStatusEnum;
 use MongoDB\Laravel\Relations\HasMany;
 
-class Upload extends Model
+class File extends Model
 {
     protected $fillable = [
         'name',
         'extension',
         'path',
         'status',
-        'uploaded_at'
     ];
 
     protected $casts = [
-        'status' => UploadStatusEnum::class,
-        'uploaded_at' => 'datetime'
+        'status' => FileStatusEnum::class,
     ];
 
-    public function updateStatus(UploadStatusEnum $status)
+    public function updateStatus(FileStatusEnum $status)
     {
         $this->status = $status;
         $this->save();

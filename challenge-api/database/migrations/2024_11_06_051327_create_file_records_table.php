@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('file_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(\App\Models\Upload::class)->constrained();
+            $table->foreignIdFor(\App\Models\File::class)->constrained();
             $table->string('RptDt')->nullable();
             $table->string('TckrSymb')->nullable();
             $table->string('Asst')->nullable();

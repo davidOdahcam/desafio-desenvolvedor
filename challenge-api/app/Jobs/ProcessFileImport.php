@@ -2,13 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Enums\UploadStatusEnum;
-use App\Imports\FileImport;
-use App\Models\Upload;
+use App\Models\File;
+use App\Services\FileService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ProcessFileImport implements ShouldQueue
 {
@@ -17,15 +14,15 @@ class ProcessFileImport implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private string $uploadId) {}
+    public function __construct(private string $fileId) {}
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        if ($upload = Upload::find($this->uploadId)) {
-            Excel::import(new FileImport($upload), $upload->path);
+        if ($file = File::find($this->fileId)) {
+            (new FileService)->importFile($file);
         }
     }
 }

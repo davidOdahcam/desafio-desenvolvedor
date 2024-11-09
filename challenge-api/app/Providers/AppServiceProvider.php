@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\AwesomeAPI\AwesomeAPIService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 

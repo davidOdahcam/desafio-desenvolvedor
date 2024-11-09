@@ -3,25 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UploadFileRequest;
-use App\Services\UploadService;
+use App\Http\Resources\FileResouce;
+use App\Models\File;
+use App\Services\FileService;
 use Illuminate\Http\Request;
 
-class UploadController extends Controller
+class FileController extends Controller
 {
-    function __construct(private UploadService $uploadService) {}
+    function __construct(private readonly FileService $fileService) {}
 
     public function listUploads()
     {
-        return response()->json([
-            'message' => 'Devo retornar uma lista'
-        ]);
+        $files = File::paginate(15);
+
+        return FileResouce::collection($files);
     }
 
     public function uploadFile(UploadFileRequest $request)
     {
-        $file_name = $request->get('name');
-        $file = $request->file('file');
-        $upload = $this->uploadService->processFile($file, $file_name);
+        $upload = $this->fileService->processFile($request->file('file'));
         return response()->json($upload);
     }
 

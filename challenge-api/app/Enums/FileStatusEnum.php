@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum UploadStatusEnum: string {
+enum FileStatusEnum: string {
     case PENDING = 'pending';
     case PROCESSING = 'processing';
     case COMPLETED = 'completed';

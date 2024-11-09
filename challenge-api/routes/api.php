@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\UploadController;
+use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -9,7 +9,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
 
-    Route::controller(UploadController::class)->prefix('uploads')->group(function () {
+    Route::controller(FileController::class)->prefix('uploads')->group(function () {
         Route::get('/', 'listUploads');
         Route::post('/', 'uploadFile');
         Route::get('/search', 'searchFile');

@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\UploadStatusEnum;
+use App\Enums\FileStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,13 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('uploads', function (Blueprint $table) {
+        Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('extension', 4);
             $table->string('path');
-            $table->enum('status', UploadStatusEnum::cases());
-            $table->timestamp('uploaded_at');
+            $table->enum('status', FileStatusEnum::cases());
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('uploads');
+        Schema::dropIfExists('files');
     }
 };
