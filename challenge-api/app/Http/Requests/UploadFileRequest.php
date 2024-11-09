@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UniqueFileRule;
 use App\Rules\UploadFileTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +25,7 @@ class UploadFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string',
-            'file' => ['required', 'file', new UploadFileTypeRule]
+            'file' => ['required', 'file', new UploadFileTypeRule, new UniqueFileRule]
         ];
     }
 }
