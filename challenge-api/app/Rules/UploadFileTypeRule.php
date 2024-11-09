@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class UploadFileTypeRule implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Check if type of file is available
      *
      * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */

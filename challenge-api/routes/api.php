@@ -11,7 +11,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::controller(FileController::class)->prefix('files')->group(function () {
         Route::get('/', 'listFiles');
+        Route::get('/search', 'searchFile');
         Route::post('/upload', 'uploadFile');
-        Route::get('/{file}/search', 'searchFileContent');
+        Route::get('/{file}', 'getFileContent');
     });
 });

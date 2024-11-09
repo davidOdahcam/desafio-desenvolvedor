@@ -2,10 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Imports\FileImport;
 use App\Models\File;
-use App\Services\FileService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProcessFileImport implements ShouldQueue
 {
@@ -22,7 +23,7 @@ class ProcessFileImport implements ShouldQueue
     public function handle(): void
     {
         if ($file = File::find($this->fileId)) {
-            (new FileService)->importFile($file);
+            Excel::import(new FileImport($file), $file->path);
         }
     }
 }

@@ -19,7 +19,7 @@ class File extends Model
         'status' => FileStatusEnum::class,
     ];
 
-    public function updateStatus(FileStatusEnum $status)
+    public function updateStatus(FileStatusEnum $status): void
     {
         $this->status = $status;
         $this->save();

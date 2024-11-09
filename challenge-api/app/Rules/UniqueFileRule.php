@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Enums\FileStatusEnum;
 use App\Models\File;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -9,7 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class UniqueFileRule implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Check if file has already been uploaded
      *
      * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
@@ -17,7 +18,7 @@ class UniqueFileRule implements ValidationRule
     {
         $filename = pathinfo($value->getClientOriginalName(), PATHINFO_FILENAME);
 
-        if (File::where('name', $filename)->exists()) {
+        if (File::where('name', $filename)->where('status', '!=', FileStatusEnum::FAILED)->exists()) {
             $fail('This file has already been uploaded.');
         }
     }

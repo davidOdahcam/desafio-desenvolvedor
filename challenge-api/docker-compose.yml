@@ -30,7 +30,7 @@ services:
     queue-worker:
         image: ot-api
         container_name: ot-queue-worker
-        command: php artisan queue:work --sleep=3 --tries=3
+        command: php artisan queue:work --timeout=0
         restart: unless-stopped
         working_dir: /var/www/api/
         volumes:
