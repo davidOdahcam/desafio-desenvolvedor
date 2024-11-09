@@ -9,9 +9,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
 
-    Route::controller(FileController::class)->prefix('uploads')->group(function () {
-        Route::get('/', 'listUploads');
-        Route::post('/', 'uploadFile');
-        Route::get('/search', 'searchFile');
+    Route::controller(FileController::class)->prefix('files')->group(function () {
+        Route::get('/', 'listFiles');
+        Route::post('/upload', 'uploadFile');
+        Route::get('/search', 'searchFileContent');
     });
 });
