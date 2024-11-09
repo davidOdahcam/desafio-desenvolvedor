@@ -69,16 +69,31 @@ class FileService {
         throw new \Exception('Error');
     }
 
+    public function searchRecords(File $file, string $tckrSymb = null, string $rptDt = null): \Illuminate\Database\Eloquent\Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $query = $file->records()
+            ->when($tckrSymb, function ($query, $tckrSymb) {
+                return $query->where('TckrSymb', $tckrSymb);
+            })
+            ->when($rptDt, function ($query, $rptDt) {
+                return $query->where('RptDt', $rptDt);
+            });
+
+        return $tckrSymb || $rptDt ? $query->get() : $query->paginate(15);
+    }
+
     public function importFile(File $file)
     {
         try {
             $file->updateStatus(FileStatusEnum::PROCESSING);
+            logger()->info('STARTED');
             Excel::import(new FileImport($file), $file->path);
+            logger()->info('COMPLETED');
             $file->updateStatus(FileStatusEnum::COMPLETED);
 
             Storage::delete($file->path);
         } catch (\Exception $e) {
-            logger()->debug($e);
+            logger()->error($e);
             $file->updateStatus(FileStatusEnum::FAILED);
         }
     }

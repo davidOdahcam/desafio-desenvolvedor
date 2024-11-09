@@ -2,33 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FileContentRequest;
 use App\Http\Requests\UploadFileRequest;
+use App\Http\Resources\FileRecordResource;
 use App\Http\Resources\FileResouce;
 use App\Models\File;
 use App\Services\FileService;
-use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
     function __construct(private readonly FileService $fileService) {}
 
-    public function listUploads()
+    public function listFiles()
     {
         $files = File::paginate(15);
-
         return FileResouce::collection($files);
     }
 
     public function uploadFile(UploadFileRequest $request)
     {
-        $upload = $this->fileService->processFile($request->file('file'));
-        return response()->json($upload);
+        $file = $this->fileService->processFile($request->file('file'));
+        return new FileResouce($file);
     }
 
-    public function searchFile(Request $request)
+    public function searchFileContent(FileContentRequest $request, File $file)
     {
-        return response()->json([
-            'message' => 'Devo retornar o conteúdo de um arquivo'
-        ]);
+        $tckrSymb = $request->get('TckrSymb');
+        $rptDt = $request->get('RptDt');
+        $records = $this->fileService->searchRecords($file, $tckrSymb, $rptDt);
+        
+        return FileRecordResource::collection($records);
     }
 }

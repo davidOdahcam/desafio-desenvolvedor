@@ -14,11 +14,11 @@ class FileImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunk
 {
     use RegistersEventListeners;
 
-    public function __construct(private readonly File $upload) {}
+    public function __construct(private readonly File $file) {}
 
     public function model(array $row)
     {
-        $attributes = array_merge($row, ['upload_id' => $this->upload->id]);
+        $attributes = array_merge($row, ['file_id' => $this->file->id]);
 
         return (new FileRecord($attributes));
     }

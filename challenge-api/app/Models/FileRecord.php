@@ -65,7 +65,7 @@ class FileRecord extends Model
 
     public $timestamps = false;
 
-    public function upload(): BelongsTo
+    public function file(): BelongsTo
     {
         return $this->belongsTo(File::class);
     }
