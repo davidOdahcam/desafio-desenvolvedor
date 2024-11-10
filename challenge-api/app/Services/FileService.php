@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\FileStatusEnum;
+use App\Exceptions\FileNotImportedException;
 use App\Exceptions\FileUploadException;
 use App\Jobs\ProcessFileImport;
 use App\Models\File;
@@ -94,9 +95,9 @@ class FileService {
      *
      * @param string|null $name The name of the file to search for.
      * @param string|null $uploadedAt The date to filter files by updating date.
-     * @return File The first matching file found, or null if no match is found.
+     * @return File|null The first matching file found, or null if no match is found.
      */
-    public function searchFile(string $name = null, string $uploadedAt = null) : File
+    public function searchFile(string $name = null, string $uploadedAt = null) : ?File
     {
         return File::when($name, function ($query, $name) {
                 return $query->where('name', $name);
@@ -117,8 +118,8 @@ class FileService {
      */
     public function getFileContent(File $file, string $tickerSymbol = null, string $reportDate = null) : LengthAwarePaginator|Collection
     {
-        throw_if($file->status === FileStatusEnum::PENDING, new \Exception('The file has not started importing yet'));
-        throw_if($file->status === FileStatusEnum::PROCESSING, new \Exception('The file has not been fully imported yet'));
+        throw_if($file->status === FileStatusEnum::PROCESSING, new FileNotImportedException());
+        throw_if($file->status !== FileStatusEnum::PENDING, new FileNotImportedException('The file has not started importing yet'));
 
         $query = $file->records()
             ->when($tickerSymbol, function ($query, $tckrSymb) {

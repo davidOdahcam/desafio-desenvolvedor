@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\FileNotImportedException;
 use App\Exceptions\FileUploadException;
 use App\Http\Requests\FileContentRequest;
 use App\Http\Requests\SearchFileRequest;
@@ -67,6 +68,10 @@ class FileController extends Controller
             $uploadedAt = $request->get('uploaded_at');
             $file = $this->fileService->searchFile($name, $uploadedAt);
 
+            if (!$file) {
+                return response()->json(['error' => 'File not found'], Response::HTTP_NOT_FOUND);
+            }
+
             return new FileResource($file);
         } catch (Exception $e) {
             return response()->json(['error' => 'An error occurred while searching the file.'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -79,6 +84,7 @@ class FileController extends Controller
      * @param FileContentRequest $request The validated request containing search parameters.
      * @param File $file The file instance to search within.
      * @return JsonResponse|AnonymousResourceCollection A JSON response with an error message or a collection of file records.
+     * @throws FileNotImportedException If the file has not been fully imported yet or import has been failed.
      * @throws Throwable Propagates any exceptions during the search operation.
      */
     public function getFileContent(FileContentRequest $request, File $file) : JsonResponse|AnonymousResourceCollection
@@ -89,8 +95,10 @@ class FileController extends Controller
             $records = $this->fileService->getFileContent($file, $tckrSymb, $rptDt);
 
             return FileRecordResource::collection($records);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'An error occurred while searching the file content.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (FileNotImportedException $e) {
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An unexpected error occurred'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

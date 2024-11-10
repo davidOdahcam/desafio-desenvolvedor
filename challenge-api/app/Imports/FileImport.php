@@ -46,15 +46,12 @@ class FileImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunk
     {
         return [
             BeforeImport::class => function(BeforeImport $event) {
-                DB::beginTransaction();
                 $this->file->updateStatus(FileStatusEnum::PROCESSING);
             },
             AfterImport::class => function(AfterImport $event) {
-                DB::commit();
                 $this->file->updateStatus(FileStatusEnum::COMPLETED);
             },
             ImportFailed::class => function(ImportFailed $event) {
-                DB::rollBack();
                 $this->file->updateStatus(FileStatusEnum::FAILED);
                 Storage::delete($this->file->path);
             }
